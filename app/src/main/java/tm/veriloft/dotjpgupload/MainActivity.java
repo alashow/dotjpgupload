@@ -113,6 +113,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         RequestParams params = new RequestParams();
+        params.put("password", "nadyusham87");
         try {
             params.put("image", fileForUpload, "image/jpg");
         } catch (Exception e) {
@@ -198,6 +199,7 @@ public class MainActivity extends ActionBarActivity {
             @Override public void onFinish() {
                 isUploading = false;
                 U.hideView(progressView);
+                progressView.setProgress(0);
                 super.onFinish();
             }
         });
