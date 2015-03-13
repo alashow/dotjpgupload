@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">dotjpg</string>
+
+    <string name="loading">Ýüklenýär</string>
+    <string name="exception">Ýalňyşlyk</string>
+    <string name="upload">Ýükle</string>
+    <string name="error">Ýalňyşlyk</string>
+    <string name="success">Ýüklendi</string>
+    <string name="image_not_found">Surat tapylmady</string>
+    <string name="network_error">Internet ýok!</string>
+    <string name="endpoint_error">Ýalňyşlyk : %1$s</string>
+    <string name="link_copied">Link nusgalandy : %1$s</string>
+</resources>
