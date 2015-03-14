@@ -135,7 +135,7 @@ public class MainActivity extends ActionBarActivity {
             public void onSuccess( int statusCode, Header[] headers, String responseString ) {
                 isUploading = false;
                 circularProgressButton.setProgress(- 1);
-                U.showCenteredToast(MainActivity.this, String.format(getString(R.string.endpoint_error), getString(R.string.error) + ": " + statusCode));
+                U.showCenteredToast(MainActivity.this, String.format(getString(R.string.endpoint_error), ": " + statusCode));
                 super.onSuccess(statusCode, headers, responseString);
             }
 
@@ -147,10 +147,21 @@ public class MainActivity extends ActionBarActivity {
                         circularProgressButton.setProgress(- 1);
                         U.showCenteredToast(MainActivity.this, String.format(getString(R.string.endpoint_error), response.getString("error")));
                     } else if (response.has("image")) {
+                        //Copying to clipboard
                         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                         ClipData clip = ClipData.newPlainText("Link", END_POINT + "/" + response.getString("image"));
                         clipboard.setPrimaryClip(clip);
+
+                        //Showing toast
                         U.showCenteredToast(MainActivity.this, String.format(getString(R.string.link_copied), response.getString("image")));
+
+                        //Sharing
+                        Intent shareIntent = new Intent();
+                        shareIntent.setAction(Intent.ACTION_SEND);
+                        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(fileForUpload));
+                        shareIntent.setType("image/jpeg");
+                        startActivity(Intent.createChooser(shareIntent, "Paýlaş"));
+
                         fileForUpload = null;
                         circularProgressButton.setProgress(100);
                     } else {
@@ -173,20 +184,20 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onFailure( int statusCode, Header[] headers, String responseString, Throwable throwable ) {
                 circularProgressButton.setProgress(- 1);
-                U.showCenteredToast(MainActivity.this, R.string.network_error);
+                U.showCenteredToast(MainActivity.this, String.format(getString(R.string.endpoint_error), throwable.getLocalizedMessage()));
             }
 
             @Override
             public void onFailure( int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse ) {
                 circularProgressButton.setProgress(- 1);
-                U.showCenteredToast(MainActivity.this, R.string.network_error);
+                U.showCenteredToast(MainActivity.this, String.format(getString(R.string.endpoint_error), throwable.getLocalizedMessage()));
                 super.onFailure(statusCode, headers, throwable, errorResponse);
             }
 
             @Override
             public void onFailure( int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse ) {
                 circularProgressButton.setProgress(- 1);
-                U.showCenteredToast(MainActivity.this, R.string.network_error);
+                U.showCenteredToast(MainActivity.this, String.format(getString(R.string.endpoint_error), throwable.getLocalizedMessage()));
                 super.onFailure(statusCode, headers, throwable, errorResponse);
             }
 
