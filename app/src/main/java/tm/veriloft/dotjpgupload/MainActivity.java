@@ -33,13 +33,14 @@ import butterknife.InjectView;
 public class MainActivity extends ActionBarActivity {
 
     public static int RESULT_GALLERY = 0xea;
-    public static String END_POINT = "http://dotjpg.co";
-    public static String END_UPLOAD_POINT = END_POINT + "/upload/index.php";
+    public static String ENDPOINT = "http://dotjpg.co";
+    public static String ENDPOINT_UPLOAD = ENDPOINT + "/upload/index.php";
+    public static String ENDPOINT_UPLOAD_PASSWORD = "nadyusham87";
 
     private boolean isUploading = false;
     private AsyncHttpClient asyncHttpClient;
     private File fileForUpload;
-    private File lastFileForUpload;
+    private File lastFileForUpload; //for sharing file after uploading
 
     @InjectView(R.id.imageView) ImageView imageView;
     @InjectView(R.id.upload) CircularProgressButton circularProgressButton;
@@ -75,6 +76,7 @@ public class MainActivity extends ActionBarActivity {
         String intentAction = intent.getAction();
         String type = intent.getType();
 
+        //Adding received
         if (Intent.ACTION_SEND.equals(intentAction) && type != null) {
             if (type.startsWith("image/")) {
                 Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
@@ -91,6 +93,11 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+    /**
+     * Adding file and showing it in image view
+     *
+     * @param uri
+     */
     public void addImage( Uri uri ) {
         String path = U.getRealPathFromURI(MainActivity.this, uri);
         File file = new File(path);
@@ -131,7 +138,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         RequestParams params = new RequestParams();
-        params.put("password", "nadyusham87");
+        params.put("password", ENDPOINT_UPLOAD_PASSWORD);
         try {
             params.put("image", fileForUpload, "image/jpg");
         } catch (Exception e) {
@@ -139,7 +146,7 @@ public class MainActivity extends ActionBarActivity {
             return;
         }
 
-        asyncHttpClient.post(getApplicationContext(), END_UPLOAD_POINT, params, new JsonHttpResponseHandler() {
+        asyncHttpClient.post(getApplicationContext(), ENDPOINT_UPLOAD, params, new JsonHttpResponseHandler() {
             int progress = 0;
 
             @Override public void onStart() {
@@ -165,15 +172,15 @@ public class MainActivity extends ActionBarActivity {
                         circularProgressButton.setProgress(- 1);
                         U.showCenteredToast(MainActivity.this, String.format(getString(R.string.endpoint_error), response.getString("error")));
                     } else if (response.has("image")) {
-                        //Copying to clipboard
+                        //Copy link to clipboard
                         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                        ClipData clip = ClipData.newPlainText("Link", END_POINT + "/" + response.getString("image"));
+                        ClipData clip = ClipData.newPlainText("Link", ENDPOINT + "/" + response.getString("image"));
                         clipboard.setPrimaryClip(clip);
 
-                        //Showing toast
+                        //Show toast with link
                         U.showCenteredToast(MainActivity.this, String.format(getString(R.string.link_copied), response.getString("image")));
 
-                        //Sharing
+                        //Share file with intent
                         shareCurrentFile();
 
                         fileForUpload = null;
@@ -231,6 +238,9 @@ public class MainActivity extends ActionBarActivity {
         });
     }
 
+    /**
+     * Share selected image with intent
+     */
     private void shareCurrentFile() {
         Intent shareIntent = new Intent();
         shareIntent.setAction(Intent.ACTION_SEND);

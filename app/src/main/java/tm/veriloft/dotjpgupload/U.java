@@ -105,19 +105,19 @@ public class U {
     public static void l( Object object, String message ) {
         if (! Config.DEBUG) return;
         if (message != null && message.equals("")) return;
-        Log.d("SazHyzmat / " + object.getClass().getSimpleName(), message);
+        Log.d("DotjpgUpload / " + object.getClass().getSimpleName(), message);
     }
 
     public static void l( String tag, String message ) {
         if (! Config.DEBUG) return;
         if (message != null && message.equals("")) return;
-        Log.d("SazHyzmat / " + tag, message);
+        Log.d("DotjpgUpload / " + tag, message);
     }
 
     public static void l( String message ) {
         if (! Config.DEBUG) return;
         if (message != null && message.equals("")) return;
-        Log.d("SazHyzmat", message);
+        Log.d("DotjpgUpload", message);
     }
 
     public static void l( Object object, int message ) {
