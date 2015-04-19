@@ -1,12 +1,11 @@
 <?php
 $max_size = 12097152;
-$random_name_length = 5;
 
 function randomName() {
 	$alphabet = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789-_!";
 	$pass = array();
 	$alphaLength = strlen($alphabet) - 1;
-	for ($i = 0; $i < $random_name_length; $i++) {
+	for ($i = 0; $i < 5; $i++) {
 		$n = rand(0, $alphaLength);
 		$pass[] = $alphabet[$n];
 	}
