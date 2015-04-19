@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -37,6 +39,7 @@ public class MainActivity extends ActionBarActivity {
     private boolean isUploading = false;
     private AsyncHttpClient asyncHttpClient;
     private File fileForUpload;
+    private File lastFileForUpload;
 
     @InjectView(R.id.imageView) ImageView imageView;
     @InjectView(R.id.upload) CircularProgressButton circularProgressButton;
@@ -48,6 +51,7 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
         asyncHttpClient = new AsyncHttpClient();
+        asyncHttpClient.setTimeout(100000);
 
         circularProgressButton.setIndeterminateProgressMode(true);
         imageView.setOnClickListener(new View.OnClickListener() {
@@ -92,9 +96,23 @@ public class MainActivity extends ActionBarActivity {
         File file = new File(path);
         if (file.exists()) {
             fileForUpload = file;
+            lastFileForUpload = file;
+            circularProgressButton.setProgress(0);
             Picasso.with(this).load(fileForUpload).into(imageView);
-
         } else U.showCenteredToast(this, R.string.image_not_found);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu( Menu menu ) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override public boolean onOptionsItemSelected( MenuItem item ) {
+        if (item.getItemId() == R.id.share && lastFileForUpload != null) {
+            shareCurrentFile();
+            return true;
+        } else return false;
     }
 
     /**
@@ -156,11 +174,7 @@ public class MainActivity extends ActionBarActivity {
                         U.showCenteredToast(MainActivity.this, String.format(getString(R.string.link_copied), response.getString("image")));
 
                         //Sharing
-                        Intent shareIntent = new Intent();
-                        shareIntent.setAction(Intent.ACTION_SEND);
-                        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(fileForUpload));
-                        shareIntent.setType("image/jpeg");
-                        startActivity(Intent.createChooser(shareIntent, "Paýlaş"));
+                        shareCurrentFile();
 
                         fileForUpload = null;
                         circularProgressButton.setProgress(100);
@@ -184,6 +198,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onFailure( int statusCode, Header[] headers, String responseString, Throwable throwable ) {
                 circularProgressButton.setProgress(- 1);
+                U.l("NetworkError: error code = " + statusCode + ", errorMessage = " + ((responseString != null) ? responseString : "null"));
                 U.showCenteredToast(MainActivity.this, String.format(getString(R.string.endpoint_error), throwable.getLocalizedMessage()));
             }
 
@@ -191,14 +206,14 @@ public class MainActivity extends ActionBarActivity {
             public void onFailure( int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse ) {
                 circularProgressButton.setProgress(- 1);
                 U.showCenteredToast(MainActivity.this, String.format(getString(R.string.endpoint_error), throwable.getLocalizedMessage()));
-                super.onFailure(statusCode, headers, throwable, errorResponse);
+                U.l("NetworkError: error code = " + statusCode + ", errorMessage = " + ((errorResponse != null) ? errorResponse.toString() : "null"));
             }
 
             @Override
             public void onFailure( int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse ) {
                 circularProgressButton.setProgress(- 1);
                 U.showCenteredToast(MainActivity.this, String.format(getString(R.string.endpoint_error), throwable.getLocalizedMessage()));
-                super.onFailure(statusCode, headers, throwable, errorResponse);
+                U.l("NetworkError: error code = " + statusCode + ", errorMessage = " + ((errorResponse != null) ? errorResponse.toString() : "null"));
             }
 
             @Override public void onCancel() {
@@ -214,5 +229,13 @@ public class MainActivity extends ActionBarActivity {
                 super.onFinish();
             }
         });
+    }
+
+    private void shareCurrentFile() {
+        Intent shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(lastFileForUpload));
+        shareIntent.setType("image/jpeg");
+        startActivity(Intent.createChooser(shareIntent, getString(R.string.share)));
     }
 }

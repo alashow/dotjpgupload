@@ -10,4 +10,5 @@
     <string name="network_error">Internet ýok!</string>
     <string name="endpoint_error">Ýalňyşlyk: %1$s</string>
     <string name="link_copied">Link nusgalandy: %1$s</string>
+    <string name="share">Paýlaş</string>
 </resources>
